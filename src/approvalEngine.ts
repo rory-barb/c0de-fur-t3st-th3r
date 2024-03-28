@@ -1,0 +1,3 @@
+const isRefundApproved = () => {
+  return true;
+};
