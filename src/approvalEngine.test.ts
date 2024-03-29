@@ -443,7 +443,7 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
 });
 
 describe("Timezones: Voicemail Out of Hour Refunds respond appropriately", () => {
-  test("when a customer should be able to not wait on out of hours if they are outside of 9-5 locally but inside uk 9-5 ", () => {
+  test("when a customer should be able to not wait on out of hours if they are outside of 9-5 locally but inside GMT 9-5 ", () => {
     const result = isRefundApproved({
       name: "JoJo",
       customerLocation: "US (EST)",
