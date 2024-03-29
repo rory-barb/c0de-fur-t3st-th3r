@@ -1,4 +1,4 @@
-## Bun + React + TypeScript + Vite
+## Bun + React + TypeScript + Vite + Tailwind
 
 `bun install`
 
