@@ -1,11 +1,11 @@
 import { expect, test, describe } from "bun:test";
-import { isRefundApproved } from "./approvalEngine";
+import { refundStatus } from "./approvalEngine";
 
 describe("Approved Cases - Should return true", () => {
   describe("by Phone", () => {
     describe("on old TOS", () => {
       test("for a customer request less than 4 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "JoJo",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2019",
@@ -16,13 +16,13 @@ describe("Approved Cases - Should return true", () => {
           refundRequestTime: "09:59",
         });
 
-        expect(result).toBe(true);
+        expect(isRefundApproved).toBe(true);
       });
     });
 
     describe("on new TOS", () => {
       test("for a customer request less than 24 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "JoJo",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2022",
@@ -33,7 +33,7 @@ describe("Approved Cases - Should return true", () => {
           refundRequestTime: "09:00",
         });
 
-        expect(result).toBe(true);
+        expect(isRefundApproved).toBe(true);
       });
     });
   });
@@ -41,7 +41,7 @@ describe("Approved Cases - Should return true", () => {
   describe("by Web App", () => {
     describe("on old TOS", () => {
       test("for a customer request less than 8 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "JoJo",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2019",
@@ -52,13 +52,13 @@ describe("Approved Cases - Should return true", () => {
           refundRequestTime: "13:59",
         });
 
-        expect(result).toBe(true);
+        expect(isRefundApproved).toBe(true);
       });
     });
 
     describe("on new TOS", () => {
       test("for a customer request less than 16 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "JoJo",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2022",
@@ -69,7 +69,7 @@ describe("Approved Cases - Should return true", () => {
           refundRequestTime: "21:59",
         });
 
-        expect(result).toBe(true);
+        expect(isRefundApproved).toBe(true);
       });
     });
   });
@@ -79,7 +79,7 @@ describe("Failed Cases - Should return false", () => {
   describe("by Phone", () => {
     describe("on old TOS", () => {
       test("for a customer request greather than 4 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Marky Mark",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2019",
@@ -90,11 +90,11 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "15:05",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
 
       test("for a customer request exactly 4 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Dr Dre",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2019",
@@ -105,13 +105,13 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "10:00",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
     });
 
     describe("on new TOS", () => {
       test("for a customer request greather than 24 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Marky Mark",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2022",
@@ -122,11 +122,11 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "06:05",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
 
       test("for a customer request exactly 24 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Dr Dre",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2022",
@@ -137,11 +137,11 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "06:00",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
 
       test("for a customer request less than 24 hours for request but over 24 hours after waiting for opening hours", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "JoJo",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2022",
@@ -152,7 +152,7 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "04:00",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
     });
   });
@@ -160,7 +160,7 @@ describe("Failed Cases - Should return false", () => {
   describe("by Web App", () => {
     describe("on old TOS", () => {
       test("for a customer request greather than 8 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Marky Mark",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2019",
@@ -171,11 +171,11 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "15:05",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
 
       test("for a customer request exactly 8 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Dr Dre",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2019",
@@ -186,13 +186,13 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "14:00",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
     });
 
     describe("on new TOS", () => {
       test("for a customer request greather than 16 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Marky Mark",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2022",
@@ -203,11 +203,11 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "22:05",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
 
       test("for a customer request exactly 16 hours from investment time", () => {
-        const result = isRefundApproved({
+        const { isRefundApproved } = refundStatus({
           name: "Dr Dre",
           customerLocation: "Europe (GMT)",
           signUpDate: "1/2/2022",
@@ -218,7 +218,7 @@ describe("Failed Cases - Should return false", () => {
           refundRequestTime: "22:00",
         });
 
-        expect(result).toBe(false);
+        expect(isRefundApproved).toBe(false);
       });
     });
   });
@@ -226,7 +226,7 @@ describe("Failed Cases - Should return false", () => {
 
 describe("Boundary Testing", () => {
   test("when a customer signed up on the day of TOS should return false due to shorter old TOS window", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/1/2020",
@@ -237,11 +237,11 @@ describe("Boundary Testing", () => {
       refundRequestTime: "11:00",
     });
 
-    expect(result).toBe(false);
+    expect(isRefundApproved).toBe(false);
   });
 
   test("when a customer signed up on the day after TOS should return true due to shorter old TOS window", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/2/2020",
@@ -252,12 +252,12 @@ describe("Boundary Testing", () => {
       refundRequestTime: "11:00",
     });
 
-    expect(result).toBe(true);
+    expect(isRefundApproved).toBe(true);
   });
 
   describe("for American vs Euro Sign up dates", () => {
     test("when a US customer signed up on 1/3/2020 US should return true for a 5 hour phone refund due to longer new TOS window: After", () => {
-      const result = isRefundApproved({
+      const { isRefundApproved } = refundStatus({
         name: "JoJo",
         customerLocation: "US (PST)",
         signUpDate: "1/3/2020",
@@ -268,11 +268,11 @@ describe("Boundary Testing", () => {
         refundRequestTime: "11:00",
       });
 
-      expect(result).toBe(true);
+      expect(isRefundApproved).toBe(true);
     });
 
     test("when a US customer signed up on 1/2/2020 US should return false for a 5 hour phone refund due to shorter old TOS window: Boundary", () => {
-      const result = isRefundApproved({
+      const { isRefundApproved } = refundStatus({
         name: "JoJo",
         customerLocation: "US (PST)",
         signUpDate: "1/2/2020",
@@ -283,11 +283,11 @@ describe("Boundary Testing", () => {
         refundRequestTime: "11:00",
       });
 
-      expect(result).toBe(false);
+      expect(isRefundApproved).toBe(false);
     });
 
     test("when a US customer signed up on 1/2/2020 US should return false for a 5 hour phone refund due to shorter old TOS window: Before", () => {
-      const result = isRefundApproved({
+      const { isRefundApproved } = refundStatus({
         name: "JoJo",
         customerLocation: "US (PST)",
         signUpDate: "1/1/2020",
@@ -298,11 +298,11 @@ describe("Boundary Testing", () => {
         refundRequestTime: "11:00",
       });
 
-      expect(result).toBe(false);
+      expect(isRefundApproved).toBe(false);
     });
 
     test("when a Euro customer signed up on 3/1/2020 Euro should return true for a 5 hour phone refund due to longer new TOS window: After", () => {
-      const result = isRefundApproved({
+      const { isRefundApproved } = refundStatus({
         name: "JoJo",
         customerLocation: "Europe (GMT)",
         signUpDate: "3/1/2020",
@@ -313,11 +313,11 @@ describe("Boundary Testing", () => {
         refundRequestTime: "11:00",
       });
 
-      expect(result).toBe(true);
+      expect(isRefundApproved).toBe(true);
     });
 
     test("when a Euro customer signed up on 2/1/2020 Euro should return false for a 5 hour phone refund due to shorter old TOS window: Equal", () => {
-      const result = isRefundApproved({
+      const { isRefundApproved } = refundStatus({
         name: "JoJo",
         customerLocation: "Europe (GMT)",
         signUpDate: "2/1/2020",
@@ -328,11 +328,11 @@ describe("Boundary Testing", () => {
         refundRequestTime: "11:00",
       });
 
-      expect(result).toBe(false);
+      expect(isRefundApproved).toBe(false);
     });
 
     test("when a Euro customer signed up on 1/1/2020 Euro should return false for a 5 hour phone refund due to shorter old TOS window: Before", () => {
-      const result = isRefundApproved({
+      const { isRefundApproved } = refundStatus({
         name: "JoJo",
         customerLocation: "Europe (GMT)",
         signUpDate: "1/1/2020",
@@ -343,14 +343,14 @@ describe("Boundary Testing", () => {
         refundRequestTime: "11:00",
       });
 
-      expect(result).toBe(false);
+      expect(isRefundApproved).toBe(false);
     });
   });
 });
 
 describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => {
   test("when a customer uses web app should log refund instantly even outside of 9-5 weekday hours and approve when under time limit", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/1/2019",
@@ -361,11 +361,11 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
       refundRequestTime: "02:59",
     });
 
-    expect(result).toBe(true);
+    expect(isRefundApproved).toBe(true);
   });
 
   test("when a customer uses phone should register refund when 9-5 weekday hours starts and approve when still under time limit", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/1/2022",
@@ -376,11 +376,11 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
       refundRequestTime: "06:00",
     });
 
-    expect(result).toBe(true);
+    expect(isRefundApproved).toBe(true);
   });
 
   test("when a customer uses phone should register refund when 9-5 weekday hours starts and reject when above time limit", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/1/2019",
@@ -391,11 +391,11 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
       refundRequestTime: "05:01",
     });
 
-    expect(result).toBe(false);
+    expect(isRefundApproved).toBe(false);
   });
 
   test("when a customer uses phone should register refund when 9-5 weekday hours starts and reject when above time due to end of workday friday", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/1/2019",
@@ -406,11 +406,11 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
       refundRequestTime: "17:01",
     });
 
-    expect(result).toBe(false);
+    expect(isRefundApproved).toBe(false);
   });
 
   test("when a customer uses phone should register refund when 9-5 weekday hours starts and reject when initiated on weekend", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/1/2024",
@@ -421,13 +421,13 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
       refundRequestTime: "17:01",
     });
 
-    expect(result).toBe(false);
+    expect(isRefundApproved).toBe(false);
   });
 
   test("when a customer uses phone should register refund when 9-5 weekday hours starts and accept when initiated and refunded on sunday", () => {
     // if placed by web app on Sunday
     // refunded by phone call on Sunday
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (GMT)",
       signUpDate: "2/1/2024",
@@ -438,13 +438,13 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
       refundRequestTime: "17:01",
     });
 
-    expect(result).toBe(true);
+    expect(isRefundApproved).toBe(true);
   });
 });
 
 describe("Timezones: Voicemail Out of Hour Refunds respond appropriately", () => {
   test("when a customer should be able to not wait on out of hours if they are outside of 9-5 locally but inside GMT 9-5 ", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "US (EST)",
       signUpDate: "2/1/2019",
@@ -455,10 +455,10 @@ describe("Timezones: Voicemail Out of Hour Refunds respond appropriately", () =>
       refundRequestTime: "05:02",
     });
 
-    expect(result).toBe(true);
+    expect(isRefundApproved).toBe(true);
   });
   test("when a customer should still be treated as out of hours when in 9-5 but not GMT timezone", () => {
-    const result = isRefundApproved({
+    const { isRefundApproved } = refundStatus({
       name: "JoJo",
       customerLocation: "Europe (CET)",
       signUpDate: "2/1/2019",
@@ -469,6 +469,6 @@ describe("Timezones: Voicemail Out of Hour Refunds respond appropriately", () =>
       refundRequestTime: "09:40",
     });
 
-    expect(result).toBe(false);
+    expect(isRefundApproved).toBe(false);
   });
 });

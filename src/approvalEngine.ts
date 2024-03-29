@@ -1,3 +1,4 @@
+import { isRefundApproved } from "./approvalEngine";
 import {
   CustomerLocationTypes,
   CustomerRequest,
@@ -21,7 +22,7 @@ const determineCustomersRefundWindow = (
   return 0; // no refund window if unknown request source
 };
 
-const standardiseDateToAmerican = (
+export const standardiseDateToAmerican = (
   date: string,
   location: CustomerLocationTypes
 ) => {
@@ -41,7 +42,7 @@ const calculateHoursBeforeRefundRequest = (
   return Math.abs(+investmentTimestamp - +refundRequestTimestamp) / 36e5;
 };
 
-const determineNextAvailableRefundDate = (
+export const determineNextAvailableRefundDate = (
   refundRequestDate: string,
   refundRequestTime: string,
   isPhone: boolean,
@@ -120,7 +121,7 @@ const standardiseDatesToUKTimezone = (
   );
 };
 
-export const isRefundApproved = (customerRequest: CustomerRequest) => {
+export const refundStatus = (customerRequest: CustomerRequest) => {
   const {
     investmentTime,
     refundRequestTime,
@@ -164,7 +165,12 @@ export const isRefundApproved = (customerRequest: CustomerRequest) => {
     isNewTOSCustomer
   );
 
-  if (hoursBeforeRefundRequest >= customersRefundWindow) return false;
-
-  return true;
+  return {
+    isRefundApproved: hoursBeforeRefundRequest < customersRefundWindow,
+    hoursBeforeRefundRequest: hoursBeforeRefundRequest,
+    localInvestmentTimeStamp: localInvestmentTimeStamp,
+    signUpDate: new Date(
+      standardiseDateToAmerican(signUpDate, customerLocation)
+    ),
+  };
 };
