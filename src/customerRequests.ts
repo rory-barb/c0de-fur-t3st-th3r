@@ -1,8 +1,15 @@
+export type RequestSourceTypes = "phone" | "web app";
+export type CustomerLocationTypes =
+  | "US (PST)"
+  | "Europe (CET)"
+  | "Europe (GMT)"
+  | "US (EST)";
+
 export type CustomerRequest = {
   name: string;
-  customerLocation: "US (PST)" | "Europe (CET)" | "Europe (GMT)" | "US (EST)";
+  customerLocation: CustomerLocationTypes;
   signUpDate: string;
-  requestSource: "phone" | "web app";
+  requestSource: RequestSourceTypes;
   investmentDate: string;
   investmentTime: string;
   refundRequestDate: string;
