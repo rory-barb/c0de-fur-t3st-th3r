@@ -1,39 +1,127 @@
-import { CustomerRequest } from "./customerRequests";
+import {
+  CustomerLocationTypes,
+  CustomerRequest,
+  RequestSourceTypes,
+} from "./customerRequests";
 
-const determineCustomersRefundWindow = () => {
-  return 4;
+const newTOSDate = new Date("1/2/2020"); // US Date Jan 2nd 2020
+
+const determineCustomersRefundWindow = (
+  source: RequestSourceTypes,
+  isNewTOSCustomer: boolean
+) => {
+  if (source === "phone") {
+    return isNewTOSCustomer ? 24 : 4;
+  }
+
+  if (source === "web app") {
+    return isNewTOSCustomer ? 16 : 8;
+  }
+
+  return 0; // no refund window if unknown request source
 };
 
-const determineHoursBeforeRefundRequest = (
-  investmentDate: string,
-  investmentTime: string,
-  refundRequestDate: string,
-  refundRequestTime: string
+const standardiseDateToAmerican = (
+  date: string,
+  location: CustomerLocationTypes
 ) => {
-  const investmentTimestamp = new Date(`${investmentDate} ${investmentTime}`);
-  const refundRequestTimestamp = new Date(
+  if (location.includes("US")) return date;
+
+  const day = date.split("/")[0];
+  const month = date.split("/")[1];
+  const year = date.split("/")[2];
+
+  return `${month}/${day}/${year}`;
+};
+
+const calculateHoursBeforeRefundRequest = (
+  investmentTimestamp: Date,
+  refundRequestTimestamp: Date
+) => {
+  return Math.abs(+investmentTimestamp - +refundRequestTimestamp) / 36e5;
+};
+
+const determineNextAvailableRefundDate = (
+  refundRequestDate: string,
+  refundRequestTime: string,
+  isPhone: boolean
+) => {
+  const originalRefundTimestamp = new Date(
     `${refundRequestDate} ${refundRequestTime}`
   );
 
-  return Math.abs(+investmentTimestamp - +refundRequestTimestamp) / 36e5;
+  if (!isPhone) return originalRefundTimestamp;
+
+  const day = originalRefundTimestamp.getDay();
+
+  const workStart = 900;
+  const workEnd = 1700;
+  const refundTime = +refundRequestTime.replace(":", "");
+
+  const isWorkHours = workStart <= refundTime && refundTime <= workEnd;
+
+  // Weekdays
+  if (day <= 5 && day != 0) {
+    if (isWorkHours) {
+      // working hours valid refund
+      return originalRefundTimestamp;
+    } else {
+      if (refundTime <= workStart) {
+        // prior to work next working hours when work opens
+        return new Date(`${refundRequestDate} 09:00`);
+      } else {
+        // post work next working hours when work opens
+        const weekday = new Date(`${refundRequestDate} 09:00`);
+
+        const daysToAdd = day === 5 ? 3 : 1;
+        return new Date(weekday.setDate(weekday.getDate() + daysToAdd));
+      }
+    }
+  } else {
+    // Weekends
+    const date = new Date(`${refundRequestDate} 09:00`);
+
+    const daysToAdd = day === 0 ? 1 : 2;
+    return new Date(date.setDate(date.getDate() + daysToAdd));
+  }
 };
 
 export const isRefundApproved = (customerRequest: CustomerRequest) => {
   const {
-    investmentDate,
     investmentTime,
-    refundRequestDate,
     refundRequestTime,
+    requestSource,
+    customerLocation,
+    investmentDate,
+    refundRequestDate,
+    signUpDate,
   } = customerRequest;
 
-  const hoursBeforeRefundRequest = determineHoursBeforeRefundRequest(
-    investmentDate,
-    investmentTime,
-    refundRequestDate,
-    refundRequestTime
+  const isNewTOSCustomer =
+    new Date(standardiseDateToAmerican(signUpDate, customerLocation)) >
+    newTOSDate;
+
+  const investmentTimestamp = new Date(
+    `${standardiseDateToAmerican(
+      investmentDate,
+      customerLocation
+    )} ${investmentTime}`
+  );
+  const refundRequestTimestamp = determineNextAvailableRefundDate(
+    standardiseDateToAmerican(refundRequestDate, customerLocation),
+    refundRequestTime,
+    requestSource === "phone"
   );
 
-  const customersRefundWindow = determineCustomersRefundWindow();
+  const hoursBeforeRefundRequest = calculateHoursBeforeRefundRequest(
+    investmentTimestamp,
+    refundRequestTimestamp
+  );
+
+  const customersRefundWindow = determineCustomersRefundWindow(
+    requestSource,
+    isNewTOSCustomer
+  );
 
   if (hoursBeforeRefundRequest >= customersRefundWindow) return false;
 

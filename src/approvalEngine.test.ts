@@ -2,35 +2,442 @@ import { expect, test, describe } from "bun:test";
 import { isRefundApproved } from "./approvalEngine";
 
 describe("Approved Cases - Should return true", () => {
-  test("for a customer request by phone less than 4 hours from investment time", () => {
-    const result = isRefundApproved({
-      name: "JoJo",
-      customerLocation: "US (PST)",
-      signUpDate: "1/2/2020",
-      requestSource: "phone",
-      investmentDate: "1/2/2021",
-      investmentTime: "06:00",
-      refundRequestDate: "1/2/2021",
-      refundRequestTime: "09:00",
+  describe("by Phone", () => {
+    describe("on old TOS", () => {
+      test("for a customer request less than 4 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "JoJo",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2019",
+          requestSource: "phone",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "09:59",
+        });
+
+        expect(result).toBe(true);
+      });
     });
 
-    expect(result).toBe(true);
+    describe("on new TOS", () => {
+      test("for a customer request less than 24 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "JoJo",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2022",
+          requestSource: "phone",
+          investmentDate: "26/3/2024",
+          investmentTime: "10:00",
+          refundRequestDate: "27/3/2024",
+          refundRequestTime: "09:00",
+        });
+
+        expect(result).toBe(true);
+      });
+    });
+  });
+
+  describe("by Web App", () => {
+    describe("on old TOS", () => {
+      test("for a customer request less than 8 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "JoJo",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2019",
+          requestSource: "web app",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "13:59",
+        });
+
+        expect(result).toBe(true);
+      });
+    });
+
+    describe("on new TOS", () => {
+      test("for a customer request less than 16 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "JoJo",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2022",
+          requestSource: "web app",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "21:59",
+        });
+
+        expect(result).toBe(true);
+      });
+    });
   });
 });
 
 describe("Failed Cases - Should return false", () => {
-  test("for a customer request by phone greather than 4 hours from investment time", () => {
+  describe("by Phone", () => {
+    describe("on old TOS", () => {
+      test("for a customer request greather than 4 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Marky Mark",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2019",
+          requestSource: "phone",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "15:05",
+        });
+
+        expect(result).toBe(false);
+      });
+
+      test("for a customer request exactly 4 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Dr Dre",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2019",
+          requestSource: "phone",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "10:00",
+        });
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe("on new TOS", () => {
+      test("for a customer request greather than 24 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Marky Mark",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2022",
+          requestSource: "phone",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "2/2/2021",
+          refundRequestTime: "06:05",
+        });
+
+        expect(result).toBe(false);
+      });
+
+      test("for a customer request exactly 24 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Dr Dre",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2022",
+          requestSource: "phone",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "2/2/2021",
+          refundRequestTime: "06:00",
+        });
+
+        expect(result).toBe(false);
+      });
+
+      test("for a customer request less than 24 hours for request but over 24 hours after waiting for opening hours", () => {
+        const result = isRefundApproved({
+          name: "JoJo",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2022",
+          requestSource: "phone",
+          investmentDate: "26/3/2024",
+          investmentTime: "05:00",
+          refundRequestDate: "27/3/2024",
+          refundRequestTime: "04:00",
+        });
+
+        expect(result).toBe(false);
+      });
+    });
+  });
+
+  describe("by Web App", () => {
+    describe("on old TOS", () => {
+      test("for a customer request greather than 8 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Marky Mark",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2019",
+          requestSource: "web app",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "15:05",
+        });
+
+        expect(result).toBe(false);
+      });
+
+      test("for a customer request exactly 8 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Dr Dre",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2019",
+          requestSource: "web app",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "14:00",
+        });
+
+        expect(result).toBe(false);
+      });
+    });
+
+    describe("on new TOS", () => {
+      test("for a customer request greather than 16 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Marky Mark",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2022",
+          requestSource: "web app",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "22:05",
+        });
+
+        expect(result).toBe(false);
+      });
+
+      test("for a customer request exactly 16 hours from investment time", () => {
+        const result = isRefundApproved({
+          name: "Dr Dre",
+          customerLocation: "Europe (GMT)",
+          signUpDate: "1/2/2022",
+          requestSource: "web app",
+          investmentDate: "1/2/2021",
+          investmentTime: "06:00",
+          refundRequestDate: "1/2/2021",
+          refundRequestTime: "22:00",
+        });
+
+        expect(result).toBe(false);
+      });
+    });
+  });
+});
+
+describe("Boundary Testing", () => {
+  test("when a customer signed up on the day of TOS should return false due to shorter old TOS window", () => {
     const result = isRefundApproved({
-      name: "Marky Mark",
-      customerLocation: "US (PST)",
-      signUpDate: "1/2/2020",
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/1/2020",
       requestSource: "phone",
       investmentDate: "1/2/2021",
       investmentTime: "06:00",
       refundRequestDate: "1/2/2021",
-      refundRequestTime: "10:00",
+      refundRequestTime: "11:00",
     });
 
     expect(result).toBe(false);
+  });
+
+  test("when a customer signed up on the day after TOS should return true due to shorter old TOS window", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/2/2020",
+      requestSource: "phone",
+      investmentDate: "1/2/2021",
+      investmentTime: "06:00",
+      refundRequestDate: "1/2/2021",
+      refundRequestTime: "11:00",
+    });
+
+    expect(result).toBe(true);
+  });
+
+  describe("for American vs Euro Sign up dates", () => {
+    test("when a US customer signed up on 1/3/2020 US should return true for a 5 hour phone refund due to longer new TOS window: After", () => {
+      const result = isRefundApproved({
+        name: "JoJo",
+        customerLocation: "US (PST)",
+        signUpDate: "1/3/2020",
+        requestSource: "phone",
+        investmentDate: "1/4/2021",
+        investmentTime: "06:00",
+        refundRequestDate: "1/4/2021",
+        refundRequestTime: "11:00",
+      });
+
+      expect(result).toBe(true);
+    });
+
+    test("when a US customer signed up on 1/2/2020 US should return false for a 5 hour phone refund due to shorter old TOS window: Boundary", () => {
+      const result = isRefundApproved({
+        name: "JoJo",
+        customerLocation: "US (PST)",
+        signUpDate: "1/2/2020",
+        requestSource: "phone",
+        investmentDate: "1/2/2021",
+        investmentTime: "06:00",
+        refundRequestDate: "1/2/2021",
+        refundRequestTime: "11:00",
+      });
+
+      expect(result).toBe(false);
+    });
+
+    test("when a US customer signed up on 1/2/2020 US should return false for a 5 hour phone refund due to shorter old TOS window: Before", () => {
+      const result = isRefundApproved({
+        name: "JoJo",
+        customerLocation: "US (PST)",
+        signUpDate: "1/1/2020",
+        requestSource: "phone",
+        investmentDate: "1/2/2021",
+        investmentTime: "06:00",
+        refundRequestDate: "1/2/2021",
+        refundRequestTime: "11:00",
+      });
+
+      expect(result).toBe(false);
+    });
+
+    test("when a Euro customer signed up on 3/1/2020 Euro should return true for a 5 hour phone refund due to longer new TOS window: After", () => {
+      const result = isRefundApproved({
+        name: "JoJo",
+        customerLocation: "Europe (GMT)",
+        signUpDate: "3/1/2020",
+        requestSource: "phone",
+        investmentDate: "1/2/2021",
+        investmentTime: "06:00",
+        refundRequestDate: "1/2/2021",
+        refundRequestTime: "11:00",
+      });
+
+      expect(result).toBe(true);
+    });
+
+    test("when a Euro customer signed up on 2/1/2020 Euro should return false for a 5 hour phone refund due to shorter old TOS window: Equal", () => {
+      const result = isRefundApproved({
+        name: "JoJo",
+        customerLocation: "Europe (GMT)",
+        signUpDate: "2/1/2020",
+        requestSource: "phone",
+        investmentDate: "1/2/2021",
+        investmentTime: "06:00",
+        refundRequestDate: "1/2/2021",
+        refundRequestTime: "11:00",
+      });
+
+      expect(result).toBe(false);
+    });
+
+    test("when a Euro customer signed up on 1/1/2020 Euro should return false for a 5 hour phone refund due to shorter old TOS window: Before", () => {
+      const result = isRefundApproved({
+        name: "JoJo",
+        customerLocation: "Europe (GMT)",
+        signUpDate: "1/1/2020",
+        requestSource: "phone",
+        investmentDate: "1/2/2021",
+        investmentTime: "06:00",
+        refundRequestDate: "1/2/2021",
+        refundRequestTime: "11:00",
+      });
+
+      expect(result).toBe(false);
+    });
+  });
+});
+
+describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => {
+  test("when a customer uses web app should log refund instantly even outside of 9-5 weekday hours and approve when under time limit", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/1/2019",
+      requestSource: "web app",
+      investmentDate: "30/3/2024",
+      investmentTime: "19:00",
+      refundRequestDate: "31/3/2024",
+      refundRequestTime: "02:59",
+    });
+
+    expect(result).toBe(true);
+  });
+
+  test("when a customer uses phone should register refund when 9-5 weekday hours starts and approve when still under time limit", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/1/2022",
+      requestSource: "phone",
+      investmentDate: "28/3/2024", // Thursday work hours
+      investmentTime: "14:30",
+      refundRequestDate: "29/3/2024", // Friday Work hours 09:00 will be under 24 hours from the Investment.
+      refundRequestTime: "06:00",
+    });
+
+    expect(result).toBe(true);
+  });
+
+  test("when a customer uses phone should register refund when 9-5 weekday hours starts and reject when above time limit", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/1/2019",
+      requestSource: "phone",
+      investmentDate: "29/3/2024", // Friday before Out of hours
+      investmentTime: "04:30",
+      refundRequestDate: "29/3/2024", // Friday Work hours 09:00 will be over 4 hours from the Investment.
+      refundRequestTime: "05:01",
+    });
+
+    expect(result).toBe(false);
+  });
+
+  test("when a customer uses phone should register refund when 9-5 weekday hours starts and reject when above time due to end of workday friday", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/1/2019",
+      requestSource: "phone",
+      investmentDate: "29/3/2024", // Friday After Out of hours
+      investmentTime: "16:55",
+      refundRequestDate: "29/3/2024", // Monda Work hours 09:00 will be over 4 hours from the Investment.
+      refundRequestTime: "17:01",
+    });
+
+    expect(result).toBe(false);
+  });
+
+  test("when a customer uses phone should register refund when 9-5 weekday hours starts and reject when initiated on weekend", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/1/2024",
+      requestSource: "phone",
+      investmentDate: "30/3/2024", // Saturday Out of hours
+      investmentTime: "16:55",
+      refundRequestDate: "1/4/2024", // Monday Work hours 09:00 will be over 24 hours from the Investment.
+      refundRequestTime: "17:01",
+    });
+
+    expect(result).toBe(false);
+  });
+
+  test("when a customer uses phone should register refund when 9-5 weekday hours starts and accept when initiated and refunded on sunday", () => {
+    // if placed by web app on Sunday
+    // refunded by phone call on Sunday
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (GMT)",
+      signUpDate: "2/1/2024",
+      requestSource: "phone",
+      investmentDate: "31/3/2024", // Sunday Out of hours
+      investmentTime: "16:55",
+      refundRequestDate: "31/3/2024", // Monday Work hours 09:00 will be under 24 hours from the Investment.
+      refundRequestTime: "17:01",
+    });
+
+    expect(result).toBe(true);
   });
 });
