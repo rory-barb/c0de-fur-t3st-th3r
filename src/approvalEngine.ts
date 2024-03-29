@@ -52,7 +52,7 @@ export const determineNextAvailableRefundDate = (
     `${refundRequestDate} ${refundRequestTime}`
   );
 
-  const localRefundTimestamp = standardiseDatesToUKTimezone(
+  const localRefundTimestamp = standardiseTimestampsToUKTimezone(
     originalRefundTimestamp,
     location
   );
@@ -95,7 +95,7 @@ export const determineNextAvailableRefundDate = (
   }
 };
 
-const standardiseDatesToUKTimezone = (
+const standardiseTimestampsToUKTimezone = (
   timestamp: Date,
   location: CustomerLocationTypes
 ) => {
@@ -143,7 +143,7 @@ export const refundStatus = (customerRequest: CustomerRequest) => {
     )} ${investmentTime}`
   );
 
-  const localInvestmentTimeStamp = standardiseDatesToUKTimezone(
+  const localInvestmentTimeStamp = standardiseTimestampsToUKTimezone(
     investmentTimestamp,
     customerLocation
   );
