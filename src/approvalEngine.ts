@@ -44,15 +44,21 @@ const calculateHoursBeforeRefundRequest = (
 const determineNextAvailableRefundDate = (
   refundRequestDate: string,
   refundRequestTime: string,
-  isPhone: boolean
+  isPhone: boolean,
+  location: CustomerLocationTypes
 ) => {
   const originalRefundTimestamp = new Date(
     `${refundRequestDate} ${refundRequestTime}`
   );
 
-  if (!isPhone) return originalRefundTimestamp;
+  const localRefundTimestamp = standardiseDatesToUKTimezone(
+    originalRefundTimestamp,
+    location
+  );
 
-  const day = originalRefundTimestamp.getDay();
+  if (!isPhone) return localRefundTimestamp;
+
+  const day = localRefundTimestamp.getDay();
 
   const workStart = 900;
   const workEnd = 1700;
@@ -64,14 +70,16 @@ const determineNextAvailableRefundDate = (
   if (day <= 5 && day != 0) {
     if (isWorkHours) {
       // working hours valid refund
-      return originalRefundTimestamp;
+      return localRefundTimestamp;
     } else {
       if (refundTime <= workStart) {
         // prior to work next working hours when work opens
-        return new Date(`${refundRequestDate} 09:00`);
+        return new Date(`${localRefundTimestamp.toDateString()} 09:00`);
       } else {
         // post work next working hours when work opens
-        const weekday = new Date(`${refundRequestDate} 09:00`);
+        const weekday = new Date(
+          `${localRefundTimestamp.toDateString()} 09:00`
+        );
 
         const daysToAdd = day === 5 ? 3 : 1;
         return new Date(weekday.setDate(weekday.getDate() + daysToAdd));
@@ -84,6 +92,32 @@ const determineNextAvailableRefundDate = (
     const daysToAdd = day === 0 ? 1 : 2;
     return new Date(date.setDate(date.getDate() + daysToAdd));
   }
+};
+
+const standardiseDatesToUKTimezone = (
+  timestamp: Date,
+  location: CustomerLocationTypes
+) => {
+  let modifier;
+
+  switch (location) {
+    case "US (PST)":
+      modifier = +7;
+      break;
+    case "US (EST)":
+      modifier = +4;
+      break;
+    case "Europe (CET)":
+      modifier = -1;
+      break;
+    default:
+      modifier = 0;
+      break;
+  }
+
+  return new Date(
+    timestamp.setTime(timestamp.getTime() + modifier * 60 * 60 * 1000)
+  );
 };
 
 export const isRefundApproved = (customerRequest: CustomerRequest) => {
@@ -107,14 +141,21 @@ export const isRefundApproved = (customerRequest: CustomerRequest) => {
       customerLocation
     )} ${investmentTime}`
   );
+
+  const localInvestmentTimeStamp = standardiseDatesToUKTimezone(
+    investmentTimestamp,
+    customerLocation
+  );
+
   const refundRequestTimestamp = determineNextAvailableRefundDate(
     standardiseDateToAmerican(refundRequestDate, customerLocation),
     refundRequestTime,
-    requestSource === "phone"
+    requestSource === "phone",
+    customerLocation
   );
 
   const hoursBeforeRefundRequest = calculateHoursBeforeRefundRequest(
-    investmentTimestamp,
+    localInvestmentTimeStamp,
     refundRequestTimestamp
   );
 

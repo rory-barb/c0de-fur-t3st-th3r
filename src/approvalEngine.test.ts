@@ -441,3 +441,34 @@ describe("Phonecall Voicemail Out of Hour Refunds respond appropriately", () => 
     expect(result).toBe(true);
   });
 });
+
+describe("Timezones: Voicemail Out of Hour Refunds respond appropriately", () => {
+  test("when a customer should be able to not wait on out of hours if they are outside of 9-5 locally but inside uk 9-5 ", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "US (EST)",
+      signUpDate: "2/1/2019",
+      requestSource: "phone",
+      investmentDate: "3/29/2024",
+      investmentTime: "04:01", // over than 4 hours to opening hour 'in local' but uk is open currently
+      refundRequestDate: "3/29/2024",
+      refundRequestTime: "05:02",
+    });
+
+    expect(result).toBe(true);
+  });
+  test("when a customer should still be treated as out of hours when in 9-5 but not GMT timezone", () => {
+    const result = isRefundApproved({
+      name: "JoJo",
+      customerLocation: "Europe (CET)",
+      signUpDate: "2/1/2019",
+      requestSource: "phone",
+      investmentDate: "29/3/2024",
+      investmentTime: "05:00", // under 4 hours to working hours locally, but the extra hour makes it 5
+      refundRequestDate: "29/3/2024",
+      refundRequestTime: "09:40",
+    });
+
+    expect(result).toBe(false);
+  });
+});
