@@ -1,4 +1,3 @@
-import { isRefundApproved } from "./approvalEngine";
 import {
   CustomerLocationTypes,
   CustomerRequest,
@@ -63,7 +62,8 @@ export const determineNextAvailableRefundDate = (
 
   const workStart = 900;
   const workEnd = 1700;
-  const refundTime = +refundRequestTime.replace(":", "");
+  const refundTime =
+    +localRefundTimestamp.getHours() * 100 + +localRefundTimestamp.getMinutes();
 
   const isWorkHours = workStart <= refundTime && refundTime <= workEnd;
 
@@ -167,8 +167,11 @@ export const refundStatus = (customerRequest: CustomerRequest) => {
 
   return {
     isRefundApproved: hoursBeforeRefundRequest < customersRefundWindow,
-    hoursBeforeRefundRequest: hoursBeforeRefundRequest,
-    localInvestmentTimeStamp: localInvestmentTimeStamp,
+    hoursBeforeRefundRequest,
+    localInvestmentTimeStamp,
+    customersRefundWindow,
+    refundRequestTimestamp,
+    isNewTOSCustomer,
     signUpDate: new Date(
       standardiseDateToAmerican(signUpDate, customerLocation)
     ),

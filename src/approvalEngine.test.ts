@@ -472,3 +472,22 @@ describe("Timezones: Voicemail Out of Hour Refunds respond appropriately", () =>
     expect(isRefundApproved).toBe(false);
   });
 });
+
+describe("Edge case - real", () => {
+  test("customer who refunds 6 hours later should have a minimum refund time of 7 hours even if out of hours opens sooner", () => {
+    // Addressing bug in out of hours time calculations not converting to UK time first.
+    const response = refundStatus({
+      name: "Wilson Doug",
+      customerLocation: "US (PST)",
+      signUpDate: "2/1/2020",
+      requestSource: "phone",
+      investmentDate: "2/1/2021",
+      investmentTime: "22:00",
+      refundRequestDate: "2/2/2021",
+      refundRequestTime: "5:00",
+    });
+
+    expect(response.isRefundApproved).toBe(true);
+    expect(response.hoursBeforeRefundRequest).toBe(7);
+  });
+});
