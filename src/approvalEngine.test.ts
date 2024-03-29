@@ -473,8 +473,8 @@ describe("Timezones: Voicemail Out of Hour Refunds respond appropriately", () =>
   });
 });
 
-describe("Edge case - real", () => {
-  test("customer who refunds 6 hours later should have a minimum refund time of 7 hours even if out of hours opens sooner", () => {
+describe("Bug Fix Tests:", () => {
+  test("customer who refunds 7 hours later should have a minimum refund time of 7 hours even if out of hours opens sooner", () => {
     // Addressing bug in out of hours time calculations not converting to UK time first.
     const response = refundStatus({
       name: "Wilson Doug",
